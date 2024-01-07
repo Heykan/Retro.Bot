@@ -1,4 +1,5 @@
 ﻿using Retro.Bot.Extension;
+using Retro.Bot.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,19 +19,19 @@ namespace Retro.Bot.Protocol.Messages.Connection
         {
         }
 
-        public void Init(string salt)
+        public HelloConnectMessage(string salt)
         {
             Salt = salt;
         }
 
-        public override void Deserialize()
+        public override void Deserialize(PacketReader reader)
         {
-            Salt = Data.ToReadable();
+            Salt = reader.PipeDelimiter[0];
         }
 
-        public override void Serialize()
+        public override void Serialize(PacketWriter writer)
         {
-            SetData(Salt.ToBytes());
+            writer.Add(Salt, "");
         }
     }
 }

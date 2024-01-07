@@ -19,7 +19,7 @@ namespace Retro.Bot.Network
             private set { m_data = value; }
         }
 
-        public string MessageHeader
+        /*public string MessageHeader
         {
             get
             {
@@ -35,7 +35,7 @@ namespace Retro.Bot.Network
                 }
                 return header;
             }
-        }
+        }*/
 
         public void Build(byte[] data)
         {

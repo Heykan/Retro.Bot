@@ -10,6 +10,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Retro.Bot.Network
 {
@@ -90,11 +91,6 @@ namespace Retro.Bot.Network
                 _client.BeginSend(sendBuffer, 0, sendBuffer.Length, SocketFlags.None, new AsyncCallback(SendCallback), _client);
             }
         }
-
-        public void Send(NetworkMessage msg)
-        {
-            Send(msg.Data);
-        }
         #endregion
 
         #region Private methods
@@ -106,7 +102,7 @@ namespace Retro.Bot.Network
             _client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
 
-        public void HandlePacket(byte[] data)
+        public void ThreatBuffer(byte[] data)
         {
             if (currentMessage == null)
                 currentMessage = new Buffer();
@@ -161,7 +157,7 @@ namespace Retro.Bot.Network
                 Array.Copy(receiveBuffer, data, bytesRead);
                 //buffer.Add(data, 0, data.Length);
                 //ThreatBuffer();
-                HandlePacket(data);
+                ThreatBuffer(data);
                 client.BeginReceive(receiveBuffer, 0, bufferLength, SocketFlags.None, new AsyncCallback(ReceiveCallback), client);
             }
             else
@@ -174,7 +170,7 @@ namespace Retro.Bot.Network
             {
                 Socket client = (Socket)ar.AsyncState;
                 client.EndSend(ar);
-                //OnDataSended(new DataSendedEventArgs());
+                OnDataSended(new EventArgs());
             }
             else
                 Console.WriteLine("Send data but not runing");
@@ -219,12 +215,10 @@ namespace Retro.Bot.Network
         public class DataReceivedEventArgs : EventArgs
         {
             public Buffer Data { get; private set; }
-            public bool Intercept { get; private set; }
 
-            public DataReceivedEventArgs(Buffer data, bool intercept = false)
+            public DataReceivedEventArgs(Buffer data)
             {
                 Data = data;
-                Intercept = intercept;
             }
         }
 

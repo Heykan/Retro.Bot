@@ -1,4 +1,5 @@
 ﻿using Retro.Bot.Forms;
+using Retro.Bot.Managers;
 using Retro.Bot.Network;
 using System;
 using System.Collections.Generic;
@@ -18,12 +19,18 @@ namespace Retro.Bot
             {
                 //Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new MainForm());
+
+                Sniffer sniffer = new Sniffer();
+                MainForm mainForm = new MainForm();
+
+                WindowManager.Init(mainForm);
+                Application.Run(mainForm);
 
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Une erreur s'est produite : {ex.Message}");
+                Console.Read();
             }
         }
     }

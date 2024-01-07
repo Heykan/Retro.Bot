@@ -1,17 +1,6 @@
-﻿using Retro.Bot.Extension;
-using Retro.Bot.Protocol;
-using Retro.Bot.Protocol.Messages.Connection;
-using Retro.Bot.Protocol.Messages.Game.Map;
+﻿using Retro.Bot.Managers;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.Net.Sockets;
 
 namespace Retro.Bot.Network
 {
@@ -19,84 +8,45 @@ namespace Retro.Bot.Network
     {
         #region Declarations
 
-        Server server;
-        Client clientLocal;
-        Client clientRemote;
-
-        string forcedAddress = null;
-        int forcedPort = 0;
+        Server _loginServer;
+        Server _gameServer;
 
         #endregion
 
         public Sniffer()
         {
-            server = new Server();
-            server.ConnectionAccepted += Server_ConnectionAccepted;
-            server.Start(8080);
-        }
-
-        private void Server_ConnectionAccepted(object sender, System.Net.Sockets.Socket acceptedSocket)
-        {
-            Console.WriteLine("Nouveau client détecté.");
-            clientLocal = new Client(acceptedSocket);
-            clientRemote = new Client();
-            clientLocal.DataReceived += ClientLocal_DataReceived;
-            clientRemote.DataReceived += ClientRemote_DataReceived;
-            if (forcedAddress == null)
-                clientRemote.Start(Ankama.Data.IP, Ankama.Data.PORT);
-            else
-                clientRemote.Start(forcedAddress, forcedPort);
-        }
-
-        private void ClientRemote_DataReceived(object sender, Client.DataReceivedEventArgs e)
-        {
-            string packet = e.Data.Data.ToReadable();
-            Console.WriteLine("RCV :: {0}", packet);
-
-            NetworkMessage msg = ProtocolManager.GetPacket(e.Data.Data, e.Data.MessageHeader);
             try
             {
-                msg?.Deserialize();
-                /*if (msg != null)
-                    HandlerManager.GetHandlers(msg);*/
-            }
-            catch
-            {
-                Console.WriteLine("Can't be deserialized/Get handler for {0}", msg.GetType().Name);
-            }
+                _loginServer = new Server();
 
-            // On envoie au client les données
-            switch (e.Data.MessageHeader)
-            {
-                case ServerSelectionMessage.Header:
-                    var ssm = msg as ServerSelectionMessage;
-                    forcedAddress = ssm.Ip;
-                    forcedPort = ssm.Port;
-                    string key = ssm.Key;
+                _loginServer.ConnectionAccepted += LoginServer_ConnectionAccepted;
 
-                    var nssm = new ServerSelectionMessage();
-                    nssm.Init("127.0.0.1", 8080, key);
-                    nssm.Serialize();
-                    clientLocal.Send(nssm);
-                    break;
-                default:
-                    clientLocal.Send(e.Data.Data);
-                    break;
+                _loginServer.Start(8080);
+            } 
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Network] {ex.Message}");
             }
         }
 
-        private void ClientLocal_DataReceived(object sender, Client.DataReceivedEventArgs e)
+        private void LoginServer_ConnectionAccepted(object sender, Socket acceptedSocket)
         {
-            Console.WriteLine("SND :: {0}", e.Data.Data.ToReadable());
-            // On envoie au serveur les données
-            clientRemote.Send(e.Data.Data);
+            if (ServerManager.GetServerData() == null)
+            {
+                Console.WriteLine("Nouveau client sur le serveur d'authentification.");
+                ClientsManager.RegisterClient(acceptedSocket, true);
+            }
+            else
+            {
+                Console.WriteLine("Nouveau client sur le serveur de jeu.");
+                ClientsManager.RegisterClient(acceptedSocket, false);
+            }
         }
 
         public void Dispose()
         {
-            clientLocal?.Stop();
-            clientRemote?.Stop();
-            server?.Stop();
+            _loginServer?.Stop();
+            _gameServer?.Stop();
         }
     }
 }

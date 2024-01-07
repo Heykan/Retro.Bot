@@ -1,7 +1,12 @@
-﻿using Retro.Bot.Extension;
+﻿using Retro.Bot.Ankama;
+using Retro.Bot.Core;
+using Retro.Bot.Extension;
+using Retro.Bot.IO;
+using Retro.Bot.Network;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -14,9 +19,9 @@ namespace Retro.Bot.Protocol
     {
         #region Declarations
 
-        //private static Dictionary<uint, Type> types;
+        private static Dictionary<string, Type> types;
         private static Dictionary<string, Type> messages;
-        //private static bool typesInitialized = false;
+        private static bool typesInitialized = false;
         private static bool messagesInitializd = false;
 
         #endregion
@@ -25,15 +30,10 @@ namespace Retro.Bot.Protocol
 
         private static Mutex mutex = new Mutex();
 
-        /*public static T GetTypeInstance<T>(uint ProtocolId) where T : class
+        public static T GetTypeInstance<T>(string ProtcolHeader) where T : class
         {
-            return getTypeInstance<T>(ProtocolId);
-        }*/
-
-        /*public static T GetTypeInstance<T>(string ProtocolHeader) where T : class
-        {
-            return getTypeInstance<T>(ProtocolHeader);
-        }*/
+            return getTypeInstance<T>(ProtcolHeader);
+        }
 
         public static NetworkMessage GetPacket(byte[] data, string header)
         {
@@ -43,8 +43,11 @@ namespace Retro.Bot.Protocol
 
             if (header != null && messages.ContainsKey(header))
             {
+                PacketReader reader = new PacketReader();
                 NetworkMessage message = (NetworkMessage)Activator.CreateInstance(messages[header]);
                 message.Data = data;
+                reader.Read(message.Data);
+                message.Deserialize(reader);
                 mutex.ReleaseMutex();
                 return message;
             }
@@ -58,21 +61,33 @@ namespace Retro.Bot.Protocol
 
         public static NetworkMessage GetPacket(byte[] buffer)
         {
-            string header = null;
-            Regex regex = new Regex(@"^([A-Z]+)");
-            Match match = regex.Match(buffer.ToReadable());
-            if (match.Success)
+            mutex.WaitOne();
+            if (!messagesInitializd)
+                InitializeMessages();
+
+            foreach(var entry in messages)
             {
-                header = match.Groups[1].Value;
+                if (buffer.ToReadable().StartsWith(entry.Key))
+                {
+                    PacketReader reader = new PacketReader();
+                    NetworkMessage message = (NetworkMessage)Activator.CreateInstance(entry.Value);
+                    message.Data = buffer;
+                    reader.Read(message.Data);
+                    message.Deserialize(reader);
+                    mutex.ReleaseMutex();
+                    return message;
+                }
             }
-            return GetPacket(buffer, header);
+
+            mutex.ReleaseMutex();
+            return null;
         }
 
         #endregion
 
         #region Metode privée
 
-        /*private static T getTypeInstance<T>(string ProtocolHeader) where T : class
+        private static T getTypeInstance<T>(string ProtocolHeader) where T : class
         {
             mutex.WaitOne();
             if (!typesInitialized)
@@ -90,27 +105,27 @@ namespace Retro.Bot.Protocol
                 mutex.ReleaseMutex();
                 return null;
             }
-        }*/
+        }
 
 
-        /*private static void InitializeTypes()
+        private static void InitializeTypes()
         {
-            typesInitialized = true;
-            types = new Dictionary<uint, Type>();
+            /*typesInitialized = true;
+            types = new Dictionary<string, Type>();
             Assembly assembly = Assembly.GetAssembly(typeof(NetworkType));
             foreach (Type t in assembly.GetTypes())
             {
                 if (t.IsSubclassOf(typeof(NetworkType)))
                 {
-                    FieldInfo f = t.GetField("Id");
+                    FieldInfo f = t.GetField("Header");
                     if (f != null)
                     {
-                        uint id = (uint)f.GetValue(t);
+                        string id = (string)f.GetValue(t);
                         types.Add(id, t);
                     }
                 }
-            }
-        }*/
+            }*/
+        }
 
         private static void InitializeMessages()
         {
@@ -133,5 +148,19 @@ namespace Retro.Bot.Protocol
 
         #endregion
 
+    }
+
+    public class PacketData
+    {
+        public object Instance { get; set; }
+        public string PacketName { get; set; }
+        public MethodInfo Information { get; set; }
+
+        public PacketData(object _instance, string _packetName, MethodInfo _information)
+        {
+            Instance = _instance;
+            PacketName = _packetName;
+            Information = _information;
+        }
     }
 }

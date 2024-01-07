@@ -24,17 +24,6 @@ namespace Retro.Bot.Forms
         {
             InitializeComponent();
             _bot = new Bot();
-
-            _bot.ClientAdded += _bot_ClientAdded;
-        }
-
-        private void _bot_ClientAdded(object sender, ClientAddedEventArgs e)
-        {
-            panel_bot.Controls.Add(e.Client.SelectorUC);
-
-            // Ajout du controle principal
-            panel_account.Controls.Clear();
-            panel_account.Controls.Add(e.Client.AccountUC);
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -50,8 +39,7 @@ namespace Retro.Bot.Forms
 
         private void SelectorForm_ProcesseSelected(object sender, ProcessSelectorForm.ProcessSelectedEventArgs e)
         {
-            bool isPair = _bot.Clients.Count % 2 == 0;
-            _bot.NewClient(new Core.Client(e.Process, isPair));
+            _bot.PatchClient(e.Process);
             var form = sender as ProcessSelectorForm;
             form.Close();
         }

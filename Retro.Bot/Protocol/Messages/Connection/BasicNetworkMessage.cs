@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Retro.Bot.IO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,11 +12,13 @@ namespace Retro.Bot.Protocol.Messages.Connection
         public const string Header = "BN";
         public override string MessageHeader => Header;
 
-        public override void Deserialize()
+        public BasicNetworkMessage() { }
+
+        public override void Deserialize(PacketReader reader)
         {
         }
 
-        public override void Serialize()
+        public override void Serialize(PacketWriter writer)
         {
         }
     }

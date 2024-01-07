@@ -58,6 +58,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>DLL\DarkUI.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -74,6 +77,9 @@
     <Compile Include="Ankama\Data.cs" />
     <Compile Include="Bot.cs" />
     <Compile Include="Core\Client.cs" />
+    <Compile Include="Core\ClientNetwork.cs" />
+    <Compile Include="Core\Utils\Cryptography\Hash.cs" />
+    <Compile Include="Core\Utils\Logger.cs" />
     <Compile Include="Extension\ProcessExtension.cs" />
     <Compile Include="Extension\StringExtension.cs" />
     <Compile Include="Forms\MainForm.cs">
@@ -100,12 +106,34 @@
     <Compile Include="Forms\UC\AccountUC.Designer.cs">
       <DependentUpon>AccountUC.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\UC\MapControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\UC\MapControl.Designer.cs">
+      <DependentUpon>MapControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Game\Account.cs" />
     <Compile Include="Game\Entity\Character.cs" />
+    <Compile Include="Game\Entity\Characteristic.cs" />
+    <Compile Include="Game\Entity\CharacterState.cs" />
+    <Compile Include="Game\Entity\IEntity.cs" />
+    <Compile Include="Game\Entity\Merchant.cs" />
+    <Compile Include="Game\Entity\Monster.cs" />
+    <Compile Include="Game\Entity\Npc.cs" />
+    <Compile Include="Game\Inventory\Inventory.cs" />
+    <Compile Include="Game\World\Cell.cs" />
+    <Compile Include="Game\World\CellType.cs" />
+    <Compile Include="Game\World\Interactive\InteractiveObject.cs" />
+    <Compile Include="Game\World\Interactive\InteractiveObjectModel.cs" />
+    <Compile Include="Game\World\Map.cs" />
+    <Compile Include="IO\PacketReader.cs" />
+    <Compile Include="IO\PacketWriter.cs" />
+    <Compile Include="Managers\ClientsManager.cs" />
+    <Compile Include="Managers\ServerManager.cs" />
+    <Compile Include="Managers\WindowManager.cs" />
     <Compile Include="Network\Buffer.cs" />
     <Compile Include="Network\Client.cs" />
     <Compile Include="Network\HandlerManager.cs" />
-    <Compile Include="Network\Handler\LoginHandler.cs" />
     <Compile Include="Network\PacketReceiveAttribute.cs" />
     <Compile Include="Network\Server.cs" />
     <Compile Include="Network\Sniffer.cs" />
@@ -117,11 +145,24 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Protocol\Messages\Connection\HelloConnectMessage.cs" />
+    <Compile Include="Protocol\Messages\Connection\NicknameMessage.cs" />
     <Compile Include="Protocol\Messages\Connection\ServerSelectionMessage.cs" />
     <Compile Include="Protocol\Messages\Connection\BasicNetworkMessage.cs" />
-    <Compile Include="Protocol\Messages\Game\Map\GameMapMessage.cs" />
+    <Compile Include="Protocol\Messages\Game\Chat\ChatMessage.cs" />
+    <Compile Include="Protocol\Messages\Game\Chat\ClientChatMessage.cs" />
+    <Compile Include="Protocol\Messages\Game\Entity\CharacteristicDataMessage.cs" />
+    <Compile Include="Protocol\Messages\Game\Entity\CharacterSelectedMessage.cs" />
+    <Compile Include="Protocol\Messages\Game\Entity\IntervalRegenrationMessage.cs" />
+    <Compile Include="Protocol\Messages\Game\Inventory\InventoryWeightMessage.cs" />
+    <Compile Include="Protocol\Messages\Game\World\Map\GameMapDataMessage.cs" />
+    <Compile Include="Protocol\Messages\Game\World\Map\GameMapMessage.cs" />
     <Compile Include="Protocol\NetworkMessage.cs" />
     <Compile Include="Protocol\ProtocolManager.cs" />
+    <Compile Include="Protocol\ProtocolTypeManager.cs" />
+    <Compile Include="Protocol\Types\Entity\CharacterType.cs" />
+    <Compile Include="Protocol\Types\Inventory\InventoryType.cs" />
+    <Compile Include="Protocol\Types\Inventory\InventoryUtils.cs" />
+    <Compile Include="Protocol\Types\Inventory\ItemType.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -129,6 +170,7 @@
   <ItemGroup>
     <Content Include="DLL\DarkUI.dll" />
     <Content Include="DLL\DarkUI.pdb" />
+    <None Include="packages.config" />
     <None Include="Resources\icons8-arrêter-90.png" />
     <None Include="Resources\coeur.png" />
     <None Include="Resources\eclair.png" />
@@ -163,6 +205,8 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Core\Utils\Maps\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

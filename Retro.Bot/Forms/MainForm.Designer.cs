@@ -31,8 +31,8 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.btn_add_account = new DarkUI.Controls.DarkButton();
-            this.panel_bot = new System.Windows.Forms.FlowLayoutPanel();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+            this.panel_bot = new System.Windows.Forms.FlowLayoutPanel();
             this.panel_account = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
@@ -43,7 +43,7 @@
             this.btn_add_account.ImageKey = "robot.png";
             this.btn_add_account.ImageList = this.imageList1;
             this.btn_add_account.ImagePadding = 0;
-            this.btn_add_account.Location = new System.Drawing.Point(12, 540);
+            this.btn_add_account.Location = new System.Drawing.Point(12, 630);
             this.btn_add_account.Name = "btn_add_account";
             this.btn_add_account.Padding = new System.Windows.Forms.Padding(5);
             this.btn_add_account.Size = new System.Drawing.Size(192, 41);
@@ -51,6 +51,12 @@
             this.btn_add_account.Text = "Ajouter un nouveau client";
             this.btn_add_account.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.btn_add_account.Click += new System.EventHandler(this.btn_add_account_Click);
+            // 
+            // imageList1
+            // 
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "robot.png");
             // 
             // panel_bot
             // 
@@ -60,14 +66,8 @@
             this.panel_bot.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.panel_bot.Location = new System.Drawing.Point(12, 12);
             this.panel_bot.Name = "panel_bot";
-            this.panel_bot.Size = new System.Drawing.Size(192, 522);
+            this.panel_bot.Size = new System.Drawing.Size(192, 612);
             this.panel_bot.TabIndex = 3;
-            // 
-            // imageList1
-            // 
-            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
-            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList1.Images.SetKeyName(0, "robot.png");
             // 
             // panel_account
             // 
@@ -77,14 +77,14 @@
             this.panel_account.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel_account.Location = new System.Drawing.Point(210, 12);
             this.panel_account.Name = "panel_account";
-            this.panel_account.Size = new System.Drawing.Size(904, 569);
+            this.panel_account.Size = new System.Drawing.Size(1117, 659);
             this.panel_account.TabIndex = 4;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1126, 593);
+            this.ClientSize = new System.Drawing.Size(1339, 683);
             this.Controls.Add(this.panel_account);
             this.Controls.Add(this.panel_bot);
             this.Controls.Add(this.btn_add_account);
@@ -97,8 +97,8 @@
 
         #endregion
         private DarkUI.Controls.DarkButton btn_add_account;
-        private System.Windows.Forms.FlowLayoutPanel panel_bot;
         private System.Windows.Forms.ImageList imageList1;
-        private System.Windows.Forms.Panel panel_account;
+        public System.Windows.Forms.FlowLayoutPanel panel_bot;
+        public System.Windows.Forms.Panel panel_account;
     }
 }

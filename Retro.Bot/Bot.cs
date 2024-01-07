@@ -1,16 +1,21 @@
 ﻿using Retro.Bot.Core;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Retro.Bot
 {
     public class Bot
     {
-        public event EventHandler<ClientAddedEventArgs> ClientAdded;
-        public event EventHandler ClientRemoved;
+        public event EventHandler<ClientPatchedEventArgs> ClientPatched;
+
+        private Dictionary<int, Thread> processThread = new Dictionary<int, Thread>();
+        private Dictionary<int, Process> fridaProcesses = new Dictionary<int, Process>();
 
         public List<Client> Clients { get; private set; } = new List<Client>();
         public List<int> HookedProcessId { get; private set; } = new List<int>();
@@ -20,31 +25,52 @@ namespace Retro.Bot
             
         }
 
-        public void NewClient(Client client)
+        public void PatchClient(Process process)
         {
-            Clients.Add(client);
-            HookedProcessId.Add(client.Process.Id);
+            HookedProcessId.Add(process.Id);
 
-            if (ClientAdded != null)
-                ClientAdded(this, new ClientAddedEventArgs(client));
+            Thread hookThread = new Thread(() => RunHook(process.Id));
+            processThread.Add(process.Id, hookThread);
+            hookThread.Start();
+
+            if (ClientPatched != null)
+                ClientPatched(this, new ClientPatchedEventArgs(process.Id));
         }
 
-        public void RemoveClient(Client client)
+        private void RunHook(int childPid)
         {
-            Clients.Remove(client);
-            HookedProcessId.Remove(client.Process.Id);
-
-            if (ClientRemoved != null)
-                ClientRemoved(this, new EventArgs());
-        }
-
-        public class ClientAddedEventArgs : EventArgs
-        {
-            public Client Client { get; private set; }
-
-            public ClientAddedEventArgs(Client client)
+            try
             {
-                Client = client;
+                Console.WriteLine("Starting injection...");
+                string path = Path.Combine(Directory.GetCurrentDirectory(), "hook.exe");
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = path,
+                    Arguments = $"{childPid} {8080}",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = false
+                };
+
+                var pythonProcess = Process.Start(startInfo);
+                fridaProcesses.Add(childPid, pythonProcess);
+
+                Thread.Sleep(4500);
+                Console.WriteLine("Process hooked.");
+                pythonProcess.WaitForExit();
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        public class ClientPatchedEventArgs : EventArgs
+        {
+            public int ProcessId { get; private set; }
+
+            public ClientPatchedEventArgs(int processId)
+            {
+                ProcessId = processId;
             }
         }
     }

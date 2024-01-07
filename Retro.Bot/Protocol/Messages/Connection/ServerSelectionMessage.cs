@@ -1,4 +1,5 @@
 ﻿using Retro.Bot.Extension;
+using Retro.Bot.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,27 +21,27 @@ namespace Retro.Bot.Protocol.Messages.Connection
         {
         }
 
-        public void Init(string ip, int port, string key)
+        public ServerSelectionMessage(string ip, int port, string key)
         {
             Ip = ip;
             Port = port;
             Key = key;
         }
 
-        public override void Deserialize()
+        public override void Deserialize(PacketReader reader)
         {
-            string packet = Data.ToReadable();
-            var splittedData = packet.Split(':');
-            var splittedPortAndKey = splittedData.Last().Split(';');
+            string[] ipPort = reader.PipeDelimiter.First().Split(';')[0].Split(':');
 
-            Ip = splittedData.First();
-            Port = int.Parse(splittedPortAndKey.First());
-            Key = splittedPortAndKey.Last();
+            Ip = ipPort[0];
+            Port = int.Parse(ipPort[1]);
+            Key = reader.PipeDelimiter.First().Split(';')[1];
         }
 
-        public override void Serialize()
+        public override void Serialize(PacketWriter writer)
         {
-            SetData($"{Header}{Ip}:{Port};{Key}".ToBytes());
+            writer.Add(Ip, ":");
+            writer.Add(Port.ToString(), ";");
+            writer.Add(Key, "");
         }
     }
 }
